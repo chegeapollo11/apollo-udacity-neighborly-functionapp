@@ -1,0 +1,126 @@
+data:
+  AzureWebJobsStorage: RGVmYXVsdEVuZHBvaW50c1Byb3RvY29sPWh0dHBzO0FjY291bnROYW1lPXN0b3JhZ2VhY2NvdW50dWRhY2lhMWMzO0FjY291bnRLZXk9cG5kSFAxSkdZck9sY2NRcU9qMTAvWlg2T1dpVjFFZ0RMSmZlY2M0V0U2am1IUmJFYUJIbXd1ZksxZ2NocG94dXRrRlEwK1dmRGQ3Q2dUQm1lU3ZGOXc9PTtFbmRwb2ludFN1ZmZpeD1jb3JlLndpbmRvd3MubmV0
+  FUNCTIONS_WORKER_RUNTIME: cHl0aG9u
+apiVersion: v1
+kind: Secret
+metadata:
+  name: apolloudacitycluster
+  namespace: default
+---
+data:
+  host.master: SVRkNHpZOEJ0ZWdhSjhJNHREbmM3bjRwSVpjbFVGbGViaUJrS1VFYWFLWGxGekZyNkh2ODdBPT0=
+  host.function.default: VDhoSndUL3FmYWVkaGI0NGVteERuWmRmZC90TG8wa3BlSFBJRVVoWC9EeWZZYXpzNVdhbWJnPT0=
+  host.systemKey.default: LzdpS1l5cGFGMzlIbDV3bFZiNlBSZENVbEdRSW9ETjBWdFIzODl5akZCY2szS0szWkdJbkJnPT0=
+  functions.createadvertisement.default: UG85ZEtIc3dWQ2hQUGE1QlBaeGFDYkxNM3JXOEJVY3JDci9RRGFHcjB2Z1BaZFpmVFU2Q2xnPT0=
+  functions.deleteadvertisement.default: TWZTVXZQSFVnVU10VmhtUUF4SVpxeHhiUVE2VWpRc2dIS0RWSHJSenIxMmlzWHpyR2IzYmJBPT0=
+  functions.getadvertisement.default: UlJTWEZwNnh1RUZFSzBPSkZiUUdjSGg0cmVTcnY0eFB3bGZHc3RuZmF4RjMveUNOWmNmRVhRPT0=
+  functions.getadvertisements.default: Y2dXOWp1T2U4U0Fyd2VWZGtKTEJDaGRieXdYa2pkcGVvU2piMkp2bGExVWlSb01FUWZOY25BPT0=
+  functions.getpost.default: OGNLVmFVbFNOM0JLZFJsUVkyY1FQRWlJZ1l6Ynp3TlNaSVh0TjRoSXdiWEkxcWsxcmg2b0N3PT0=
+  functions.getposts.default: eTAvMFV1TlBLc0VrVklzcVNqQVNhV2VxcXM4b01mdmVZMGV1WVZja1lqNk1CRHRDeWgvc0t3PT0=
+  functions.updateadvertisement.default: Sy9YSmc3OFVUdnJBdWNBLzlhc1MvdDl0czVpd2ZzYVdpT2Y4a0ZYSGx1QmpWV01yQVNMZzRRPT0=
+apiVersion: v1
+kind: Secret
+metadata:
+  name: func-keys-kube-secret-apolloudacitycluster
+  namespace: default
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: apolloudacitycluster-function-keys-identity-svc-act
+  namespace: default
+---
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - secrets
+  - configMaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: functions-keys-manager-role
+  namespace: default
+---
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: functions-keys-manager-role
+subjects:
+- kind: ServiceAccount
+  name: apolloudacitycluster-function-keys-identity-svc-act
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: apolloudacitycluster-function-keys-identity-svc-act-functions-keys-manager-rolebinding
+  namespace: default
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apolloudacitycluster-http
+  namespace: default
+spec:
+  selector:
+    app: apolloudacitycluster-http
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apolloudacitycluster-http
+  namespace: default
+  labels:
+    app: apolloudacitycluster-http
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apolloudacitycluster-http
+  template:
+    metadata:
+      labels:
+        app: apolloudacitycluster-http
+    spec:
+      containers:
+      - name: apolloudacitycluster-http
+        image: apolloudacityregistry.azurecr.io/neighborlyfunctionapp:v1
+        ports:
+        - containerPort: 80
+        env:
+        - name: AzureFunctionsJobHost__functions__0
+          value: createAdvertisement
+        - name: AzureFunctionsJobHost__functions__1
+          value: deleteAdvertisement
+        - name: AzureFunctionsJobHost__functions__2
+          value: getAdvertisement
+        - name: AzureFunctionsJobHost__functions__3
+          value: getAdvertisements
+        - name: AzureFunctionsJobHost__functions__4
+          value: getPost
+        - name: AzureFunctionsJobHost__functions__5
+          value: getPosts
+        - name: AzureFunctionsJobHost__functions__6
+          value: updateAdvertisement
+        - name: AzureWebJobsSecretStorageType
+          value: kubernetes
+        - name: AzureWebJobsKubernetesSecretName
+          value: secrets/func-keys-kube-secret-apolloudacitycluster
+        envFrom:
+        - secretRef:
+            name: apolloudacitycluster
+      serviceAccountName: apolloudacitycluster-function-keys-identity-svc-act
+---
+
