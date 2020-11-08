@@ -121,6 +121,8 @@ spec:
         envFrom:
         - secretRef:
             name: apolloudacitycluster
+      imagePullSecrets:
+      - name: apolloudacityregistry
       serviceAccountName: apolloudacitycluster-function-keys-identity-svc-act
 ---
 
