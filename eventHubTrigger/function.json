@@ -5,8 +5,8 @@
       "type": "eventGridTrigger",
       "name": "event",
       "direction": "in",
-	  "eventHubName": "neighborlyeventhub", 
-	  "connection": "Endpoint=sb://apolloudacityneighborly.servicebus.windows.net/;SharedAccessKeyName=allPolicies;SharedAccessKey=Fu0QveB6w4aHa+NEWAGPE/MP2z7qVBddsrUXNwl4g6k=;EntityPath=neighborlyeventhub"
+	    "eventHubName": "neighborlyeventhub", 
+	    "connection": "Endpoint=sb://apolloudacityneighborly.servicebus.windows.net/;SharedAccessKeyName=allPolicies;SharedAccessKey=Fu0QveB6w4aHa+NEWAGPE/MP2z7qVBddsrUXNwl4g6k=;EntityPath=neighborlyeventhub"
     }
   ]
 }
